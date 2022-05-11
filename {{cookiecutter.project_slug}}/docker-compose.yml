@@ -1,4 +1,4 @@
-version: "3.3"
+version: "3.8"
 services:
 
   proxy:
@@ -68,8 +68,9 @@ services:
         # to disable www redirection remove the section: ${STACK_NAME?Variable not set}-www-redirect,
         - traefik.http.routers.${STACK_NAME?Variable not set}-proxy-http.middlewares=${STACK_NAME?Variable not set}-www-redirect,${STACK_NAME?Variable not set}-https-redirect
 
-  db:
-    image: postgres:14.2
+  database:
+    container_name: database
+    image: postgres:14
     volumes:
       - app-db-data:/var/lib/postgresql/data/pgdata
     env_file:
@@ -87,9 +88,11 @@ services:
       - ${TRAEFIK_PUBLIC_NETWORK?Variable not set}
       - default
     depends_on:
-      - db
+      - database
     env_file:
       - .env
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
     deploy:
       labels:
         - traefik.enable=true
@@ -140,7 +143,7 @@ services:
   backend:
     image: '${DOCKER_IMAGE_BACKEND?Variable not set}:${TAG-latest}'
     depends_on:
-      - db
+      - database
     env_file:
       - .env
     environment:
@@ -163,7 +166,7 @@ services:
   celeryworker:
     image: '${DOCKER_IMAGE_CELERYWORKER?Variable not set}:${TAG-latest}'
     depends_on:
-      - db
+      - database
       - queue
     env_file:
       - .env
@@ -193,6 +196,7 @@ services:
 
 volumes:
   app-db-data:
+  pgadmin-data:
 
 networks:
   traefik-public:
