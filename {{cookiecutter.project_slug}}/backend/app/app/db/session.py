@@ -27,7 +27,7 @@ if settings.PROFILE_QUERY_MODE:
     def before_cursor_execute(conn, cursor, statement,
                             parameters, context, executemany):
         conn.info.setdefault('query_start_time', []).append(time.time())
-        logger.debug("Start Query: %s" % statement)
+        logger.debug(f"Start Query: {statement}")
 
     def after_cursor_execute(conn, cursor, statement,
                             parameters, context, executemany):
