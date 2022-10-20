@@ -20,13 +20,13 @@ async def read_items(
     """
     Retrieve items.
     """
-    if crud.user.is_superuser(current_user):
-        items = await crud.item.get_multi(db, skip=skip, limit=limit)
-    else:
-        items = await crud.item.get_multi_by_owner(
+    return (
+        await crud.item.get_multi(db, skip=skip, limit=limit)
+        if crud.user.is_superuser(current_user)
+        else await crud.item.get_multi_by_owner(
             db=db, owner_id=current_user.id, skip=skip, limit=limit
         )
-    return items
+    )
 
 
 @router.post("/", response_model=schemas.Item)

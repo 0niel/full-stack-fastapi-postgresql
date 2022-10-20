@@ -34,8 +34,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             update_data = obj_in
         else:
             update_data = obj_in.dict(exclude_unset=True)
-        password = update_data.pop("password", None)
-        if password:
+        if password := update_data.pop("password", None):
             hashed_password = get_password_hash(password)
             update_data["hashed_password"] = hashed_password
         return await super().update(db, db_obj=db_obj, obj_in=update_data)
@@ -44,9 +43,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         user = await self.get_by_email(db, email=email)
         if not user:
             return None
-        if not verify_password(password, user.hashed_password):
-            return None
-        return user
+        return user if verify_password(password, user.hashed_password) else None
 
     def is_active(self, user: User) -> bool:
         return user.is_active
